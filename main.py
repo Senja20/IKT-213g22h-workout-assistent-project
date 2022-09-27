@@ -1,5 +1,6 @@
-import cv2 # type: ignore
-import mediapipe as mp # type: ignore
+import cv2  # type: ignore
+import cvzone  # type: ignore
+import mediapipe as mp  # type: ignore
 import numpy as np
 
 # Gives us all the drawing utilities. Going to be used to visualize the poses
@@ -7,6 +8,9 @@ mp_drawing = mp.solutions.drawing_utils
 
 # Importing the pose estimation models
 mp_pose = mp.solutions.pose
+
+# Initialize the FPS reader for displaying on the final image
+fps_injector = cvzone.FPS()
 
 
 def make_detections(pose, frame):
@@ -60,9 +64,11 @@ if __name__ == "__main__":
 
         while cap.isOpened():
             # Stores what ever we get from the capture (ret is return variable (nothing here) and frame is the image)
-            ret, my_frame = cap.read()
+            ret, cap_frame = cap.read()
 
-            my_image, my_results = make_detections(my_pose, my_frame)
+            # clean_frame = clean_background(cap_frame)
+
+            my_image, my_results = make_detections(my_pose, cap_frame)
 
             # Extract landmarks
             try:
@@ -173,6 +179,9 @@ if __name__ == "__main__":
                     color=(245, 66, 230), thickness=2, circle_radius=2
                 ),
             )
+
+            # Inject the FPS onto the frame
+            fps_injector.update(my_image, (20, 200))
 
             # Shows the image with the landmarks on them (after the processing)
             cv2.imshow("Mediapipe Feed", my_image)
