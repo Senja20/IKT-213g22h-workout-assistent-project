@@ -1,9 +1,13 @@
 import cv2  # type: ignore
+import cvzone  # type: ignore
 from cvzone.PoseModule import PoseDetector  # type: ignore
 from cvzone.SelfiSegmentationModule import SelfiSegmentation  # type: ignore
 
 # Initialize the SelfiSegmentationModule
 segmentor = SelfiSegmentation()
+
+# Initialize the FPS reader for displaying on the final image
+fps_injector = cvzone.FPS()
 
 
 def whiteness_offset(img) -> float:
@@ -37,6 +41,9 @@ while True:
     if bboxInfo:
         center = bboxInfo["center"]
         cv2.circle(img, center, 5, (255, 0, 255), cv2.FILLED)
+
+    # Inject the FPS onto the frame
+    fps_injector.update(img, (20, 200))
 
     cv2.imshow("Image", img)
     if cv2.waitKey(1) & 0xFF == ord("q"):
