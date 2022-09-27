@@ -64,11 +64,9 @@ if __name__ == "__main__":
 
         while cap.isOpened():
             # Stores what ever we get from the capture (ret is return variable (nothing here) and frame is the image)
-            ret, cap_frame = cap.read()
+            ret, my_frame = cap.read()
 
-            # clean_frame = clean_background(cap_frame)
-
-            my_image, my_results = make_detections(my_pose, cap_frame)
+            my_image, my_results = make_detections(my_pose, my_frame)
 
             # Extract landmarks
             try:
