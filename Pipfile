@@ -6,8 +6,15 @@ name = "pypi"
 [packages]
 opencv-contrib-python = "4.6.0.66"
 mediapipe = "0.8.11"
+black = "*"
 
 [dev-packages]
+pylint = "*"
+mypy = "*"
+black = "*"
 
 [requires]
 python_version = "3.10"
+
+[pipenv]
+allow_prereleases = true
