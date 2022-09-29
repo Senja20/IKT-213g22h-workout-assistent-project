@@ -7,6 +7,7 @@ name = "pypi"
 opencv-contrib-python = "4.6.0.66"
 mediapipe = "0.8.11"
 black = "*"
+cvzone = "*"
 
 [dev-packages]
 pylint = "*"

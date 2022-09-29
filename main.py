@@ -1,5 +1,5 @@
-import cv2 # type: ignore
-import mediapipe as mp # type: ignore
+import cv2  # type: ignore
+import mediapipe as mp  # type: ignore
 import numpy as np
 
 # Gives us all the drawing utilities. Going to be used to visualize the poses
