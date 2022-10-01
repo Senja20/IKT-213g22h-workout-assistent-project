@@ -129,15 +129,16 @@ if __name__ == "__main__":
                 1,
                 cv2.LINE_AA,
             )
+            lmList = detector.get_interest_points(frame = my_image, results=my_results)
+            print(lmList)
 
-            print(detector.get_interest_points(frame = my_image, results=my_results))
+            detector.mask_point(frame=my_image, lmList=lmList, pointID=13)
 
             # Draws the pose landmarks and the connections between them to the image
             detector.draw_pose_pose_landmark(frame=my_image, results=my_results)
 
             # Shows the image with the landmarks on them (after the processing)
             cv2.imshow("Mediapipe Feed", my_image)
-
             # Breaks the loop if you hit q
             if cv2.waitKey(10) & 0xFF == ord("q"):
                 break

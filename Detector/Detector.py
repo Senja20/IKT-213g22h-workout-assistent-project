@@ -65,3 +65,6 @@ class Detector:
                 color=(245, 66, 230), thickness=2, circle_radius=2
             ),
         )
+    def mask_point(self, frame, pointID, lmList):
+        if len(lmList) != 0:
+            cv2.circle(frame, (lmList[pointID][1], lmList[pointID][2]), 40, (255, 0, 0), 4)
