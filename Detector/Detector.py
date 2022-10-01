@@ -8,6 +8,7 @@ class Detector:
                  smooth=True,
                  detectionCon=0.5,
                  trackCon=0.5):
+
         self.mode = mode
         self.upBody = upBody
         self.detectionCon = detectionCon
@@ -15,7 +16,10 @@ class Detector:
         self.smooth = smooth
 
         self.results = None
+
+        # Gives us all the drawing utilities. Going to be used to visualize the poses
         self.mp_drawing = mp.solutions.drawing_utils
+        # Importing the pose estimation models
         self.mp_pose = mp.solutions.pose
         self.pose = self.mp_pose.Pose(static_image_mode=self.mode,
                                      enable_segmentation=self.upBody,
