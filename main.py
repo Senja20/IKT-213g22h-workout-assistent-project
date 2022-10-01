@@ -3,6 +3,7 @@ import mediapipe as mp  # type: ignore
 import numpy as np
 
 from functions.calculate_angle_between_points import calculate_angle_between_points
+from Detector.Detector import Detector
 
 # Gives us all the drawing utilities. Going to be used to visualize the poses
 mp_drawing = mp.solutions.drawing_utils
@@ -10,24 +11,10 @@ mp_drawing = mp.solutions.drawing_utils
 # Importing the pose estimation models
 mp_pose = mp.solutions.pose
 
-
-def make_detections(pose, frame):
-    # Recolor the frame (opencv gives the image in BGR format. while mediapipe uses images in RGB format)
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    # saves memory when we pass it to the pose estimation model?
-    image.flags.writeable = False
-
-    # Make the detection (stores the detection)
-    results = pose.process(image)
-
-    # Recolor the image back to BGR
-    image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-    return image, results
-
-
 if __name__ == "__main__":
+    # instance of the detector class
+    detector = Detector()
+
     # counter for reps
     counter = 0
     # determine we are now on the up or down of the curl exercise
@@ -46,7 +33,7 @@ if __name__ == "__main__":
             # Stores what ever we get from the capture (ret is return variable (nothing here) and frame is the image)
             ret, my_frame = cap.read()
 
-            my_image, my_results = make_detections(my_pose, my_frame)
+            my_image, my_results = detector.make_detections(my_frame)
 
             # Extract landmarks
             try:
@@ -142,6 +129,8 @@ if __name__ == "__main__":
                 1,
                 cv2.LINE_AA,
             )
+
+            print(detector.get_interest_points(img = my_frame, results=my_results))
 
             # Draws the pose landmarks and the connections between them to the image
             mp_drawing.draw_landmarks(
