@@ -38,11 +38,26 @@ class Detector:
 
         return image, self.results
 
-    def get_interest_points(self, img, results):
+    def get_interest_points(self, frame, results):
         lmList = []
         if results.pose_landmarks:
             for id, lm in enumerate(results.pose_landmarks.landmark):
-                h, w, c = img.shape
+                h, w, c = frame.shape
                 cx, cy = int(lm.x * w), int(lm.y * h)
                 lmList.append([id, cx, cy])
         return lmList
+
+    def draw_pose_pose_landmark(self, frame, results):
+        self.mp_drawing.draw_landmarks(
+            frame,
+            results.pose_landmarks,
+            self.mp_pose.POSE_CONNECTIONS,
+            # changing color and thickness of the circle drawing
+            self.mp_drawing.DrawingSpec(
+                color=(245, 117, 66), thickness=2, circle_radius=2
+            ),
+            # changing color and thicknes of the connections drawing
+            self.mp_drawing.DrawingSpec(
+                color=(245, 66, 230), thickness=2, circle_radius=2
+            ),
+        )

@@ -130,22 +130,10 @@ if __name__ == "__main__":
                 cv2.LINE_AA,
             )
 
-            print(detector.get_interest_points(img = my_frame, results=my_results))
+            print(detector.get_interest_points(frame = my_image, results=my_results))
 
             # Draws the pose landmarks and the connections between them to the image
-            mp_drawing.draw_landmarks(
-                my_image,
-                my_results.pose_landmarks,
-                mp_pose.POSE_CONNECTIONS,
-                # changing color and thickness of the circle drawing
-                mp_drawing.DrawingSpec(
-                    color=(245, 117, 66), thickness=2, circle_radius=2
-                ),
-                # changing color and thicknes of the connections drawing
-                mp_drawing.DrawingSpec(
-                    color=(245, 66, 230), thickness=2, circle_radius=2
-                ),
-            )
+            detector.draw_pose_pose_landmark(frame=my_image, results=my_results)
 
             # Shows the image with the landmarks on them (after the processing)
             cv2.imshow("Mediapipe Feed", my_image)
