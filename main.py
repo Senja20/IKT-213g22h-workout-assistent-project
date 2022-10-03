@@ -2,48 +2,19 @@ import cv2  # type: ignore
 import mediapipe as mp  # type: ignore
 import numpy as np
 
+from functions.calculate_angle_between_points import calculate_angle_between_points
+from Detector.Detector import Detector
+
 # Gives us all the drawing utilities. Going to be used to visualize the poses
 mp_drawing = mp.solutions.drawing_utils
 
 # Importing the pose estimation models
 mp_pose = mp.solutions.pose
 
-
-def make_detections(pose, frame):
-    # Recolor the frame (opencv gives the image in BGR format. while mediapipe uses images in RGB format)
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    # saves memory when we pass it to the pose estimation model?
-    image.flags.writeable = False
-
-    # Make the detection (stores the detection)
-    results = pose.process(image)
-
-    # Recolor the image back to BGR
-    image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-    return image, results
-
-
-def calculate_angle_between_points(pointA, pointB, pointC):
-    # convert the point to numpy arrays
-    pointA = np.array(pointA)  # first point
-    pointB = np.array(pointB)  # mid point
-    pointC = np.array(pointC)  # last point
-
-    # calculate the angle using trigonometry and convert it to degrees
-    angle_in_radians = np.arctan2(
-        pointC[1] - pointB[1], pointC[0] - pointB[0]
-    ) - np.arctan2(pointA[1] - pointB[1], pointA[0] - pointB[0])
-    angle_in_degrees = np.abs(angle_in_radians * 180.0 / np.pi)
-
-    if angle_in_degrees > 180.0:
-        angle_in_degrees = 360 - angle_in_degrees
-
-    return angle_in_degrees
-
-
 if __name__ == "__main__":
+    # instance of the detector class
+    detector = Detector()
+
     # counter for reps
     counter = 0
     # determine we are now on the up or down of the curl exercise
@@ -62,7 +33,7 @@ if __name__ == "__main__":
             # Stores what ever we get from the capture (ret is return variable (nothing here) and frame is the image)
             ret, my_frame = cap.read()
 
-            my_image, my_results = make_detections(my_pose, my_frame)
+            my_image, my_results = detector.make_detections(my_frame)
 
             # Extract landmarks
             try:
@@ -158,25 +129,16 @@ if __name__ == "__main__":
                 1,
                 cv2.LINE_AA,
             )
+            lmList = detector.get_interest_points(frame = my_image, results=my_results)
+            print(lmList)
+
+            detector.mask_point(frame=my_image, lmList=lmList, pointID=13)
 
             # Draws the pose landmarks and the connections between them to the image
-            mp_drawing.draw_landmarks(
-                my_image,
-                my_results.pose_landmarks,
-                mp_pose.POSE_CONNECTIONS,
-                # changing color and thickness of the circle drawing
-                mp_drawing.DrawingSpec(
-                    color=(245, 117, 66), thickness=2, circle_radius=2
-                ),
-                # changing color and thicknes of the connections drawing
-                mp_drawing.DrawingSpec(
-                    color=(245, 66, 230), thickness=2, circle_radius=2
-                ),
-            )
+            detector.draw_pose_pose_landmark(frame=my_image, results=my_results)
 
             # Shows the image with the landmarks on them (after the processing)
             cv2.imshow("Mediapipe Feed", my_image)
-
             # Breaks the loop if you hit q
             if cv2.waitKey(10) & 0xFF == ord("q"):
                 break
