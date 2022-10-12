@@ -1,6 +1,7 @@
 import cv2  # type: ignore
 import mediapipe as mp  # type: ignore
 import numpy as np
+from StateMachine.RepsStateMachine import Curl
 
 from functions.calculate_angle_between_points import calculate_angle_between_points
 from Detector.Detector import Detector
@@ -12,6 +13,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 if __name__ == "__main__":
+    stateMachine = Curl()
     # instance of the detector class
     detector = Detector()
 
@@ -68,14 +70,40 @@ if __name__ == "__main__":
                     cv2.LINE_AA,
                 )
 
+
                 # Curl counter logic
-                if my_angle > 160:
+                if my_angle > 160 and stateMachine.current_state.value == "State0":
                     stage = "down"
 
-                if my_angle < 30 and stage == "down":
-                    stage = "up"
+                    stateMachine.switch1()
+                    print(stateMachine.current_state)
+                elif my_angle > 160 and stateMachine.current_state.value == "ReturnState3":
+                    stateMachine.to_initial()
                     counter += 1
-                    print(counter)
+                    print(stateMachine.current_state.value)
+
+                if 160 > my_angle > 100 and stateMachine.current_state.value == "State1":
+                    stateMachine.switch2()
+                    print(stateMachine.current_state.value)
+                if 160 > my_angle > 100 and stateMachine.current_state.value == "ReturnState2":
+                    stateMachine.switch5()
+                    print(stateMachine.current_state.value)
+
+                if 100 > my_angle > 60 and stateMachine.current_state.value == "State2":
+                    stateMachine.switch3()
+                    print(stateMachine.current_state.value)
+                elif 100 > my_angle > 60 and stateMachine.current_state.value == "ReturnState1":
+                    stateMachine.switch4()
+                    print(stateMachine.current_state.value)
+
+                if my_angle < 40 and stage == "down" and stateMachine.current_state.value == "State3":
+                    stage = "up"
+
+                    stateMachine.start_return_to_init_state()
+                    print(stateMachine.current_state.value)
+
+
+
 
             except:
                 pass
@@ -130,7 +158,6 @@ if __name__ == "__main__":
                 cv2.LINE_AA,
             )
             lmList = detector.get_interest_points(frame = my_image, results=my_results)
-            print(lmList)
 
             detector.mask_point(frame=my_image, lmList=lmList, pointID=13)
 
