@@ -1,16 +1,21 @@
-import cv2
-import mediapipe as mp
-import time
+import cv2  # type: ignore
+import mediapipe as mp  # type: ignore
+
 
 class Detector:
-    def __init__(self, mode=False,
-                 upBody=False,
-                 smooth=True,
-                 detectionCon=0.5,
-                 trackCon=0.5):
+    def __init__(
+        self,
+        mode=False,
+        upBody=False,
+        smoothBody=False,
+        smooth=True,
+        detectionCon=0.5,
+        trackCon=0.5,
+    ):
 
         self.mode = mode
         self.upBody = upBody
+        self.smoothBody = smoothBody
         self.detectionCon = detectionCon
         self.trackCon = trackCon
         self.smooth = smooth
@@ -21,11 +26,14 @@ class Detector:
         self.mp_drawing = mp.solutions.drawing_utils
         # Importing the pose estimation models
         self.mp_pose = mp.solutions.pose
-        self.pose = self.mp_pose.Pose(static_image_mode=self.mode,
-                                     enable_segmentation=self.upBody,
-                                     smooth_landmarks=self.smooth,
-                                     min_detection_confidence=self.detectionCon,
-                                     min_tracking_confidence=self.trackCon)
+        self.pose = self.mp_pose.Pose(
+            static_image_mode=self.mode,
+            enable_segmentation=self.upBody,
+            smooth_segmentation=self.smoothBody,
+            smooth_landmarks=self.smooth,
+            min_detection_confidence=self.detectionCon,
+            min_tracking_confidence=self.trackCon,
+        )
 
     def make_detections(self, frame):
         # Recolor the frame (opencv gives the image in BGR format. while mediapipe uses images in RGB format)
@@ -65,6 +73,9 @@ class Detector:
                 color=(245, 66, 230), thickness=2, circle_radius=2
             ),
         )
+
     def mask_point(self, frame, pointID, lmList):
         if len(lmList) != 0:
-            cv2.circle(frame, (lmList[pointID][1], lmList[pointID][2]), 40, (255, 0, 0), 4)
+            cv2.circle(
+                frame, (lmList[pointID][1], lmList[pointID][2]), 40, (255, 0, 0), 4
+            )
