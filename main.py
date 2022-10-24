@@ -101,7 +101,7 @@ if __name__ == "__main__":
                     counter += 1
                     print(counter)
 
-            except TypeError:
+            except AttributeError:
                 # If there is no pose detected (NoneType error), pass
                 pass
 
