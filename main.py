@@ -1,9 +1,20 @@
+"""
+Prof of concept for a workout assistant, utilizing Mediapipe, OpenCV, and
+our own custom code (some based on CVZone).
+Detects repetitions for pushups.
+"""
+
 import cv2  # type: ignore
 import mediapipe as mp  # type: ignore
 import numpy as np
 
-from functions.calculate_angle_between_points import calculate_angle_between_points
-from Detector.Detector import Detector
+from Detector.Detector import Detector  # type: ignore
+from functions.calculate_angle_between_points import (  # type: ignore
+    calculate_angle_between_points,
+)
+from SelfieSegmentation.selfie_segmentation import SelfieSegmentation  # type: ignore
+from Utility.fps import FPS  # type: ignore
+from Utility.utility import whiteness_offset  # type: ignore
 
 # Gives us all the drawing utilities. Going to be used to visualize the poses
 mp_drawing = mp.solutions.drawing_utils
@@ -13,27 +24,40 @@ mp_pose = mp.solutions.pose
 
 if __name__ == "__main__":
     # instance of the detector class
-    detector = Detector()
+    detector = Detector(upBody=True, smoothBody=True)
+    # Initialize the SelfieSegmentationModule
+    segmenter = SelfieSegmentation()
+
+    # Initialize the FPS reader for displaying on the final image
+    fps_injector = FPS()
 
     # counter for reps
-    counter = 0
+    counter: int = 0
     # determine we are now on the up or down of the curl exercise
-    stage = None
+    stage: None | str = None
 
-    # Video Feed
-    # setting up the video capture device. The number represents the camera (can change from device to device)
+    # Video Feed setting up the video capture device. The number represents the
+    # camera (can change from device to device)
     cap = cv2.VideoCapture(0)
 
-    # Accesses a pose detection model with detection and tracking confidence of 50%
+    # Accesses a pose detection model with detection and tracking confidence of
+    # 50%
     with mp_pose.Pose(
         min_detection_confidence=0.5, min_tracking_confidence=0.5
     ) as my_pose:
 
         while cap.isOpened():
-            # Stores what ever we get from the capture (ret is return variable (nothing here) and frame is the image)
+            # Stores what ever we get from the capture (ret is return variable
+            # (nothing here) and frame is the image)
             ret, my_frame = cap.read()
 
-            my_image, my_results = detector.make_detections(my_frame)
+            threshold = whiteness_offset(my_frame)
+            bg_image = cv2.GaussianBlur(my_frame, (55, 55), 0)
+            clean_img = segmenter.removeBG(
+                my_frame, imgBg=bg_image, threshold=threshold
+            )
+
+            my_image, my_results = detector.make_detections(clean_img)
 
             # Extract landmarks
             try:
@@ -77,7 +101,8 @@ if __name__ == "__main__":
                     counter += 1
                     print(counter)
 
-            except:
+            except AttributeError:
+                # If there is no pose detected (NoneType error), pass
                 pass
 
             # Visualize the curl counter in a box
@@ -129,13 +154,16 @@ if __name__ == "__main__":
                 1,
                 cv2.LINE_AA,
             )
-            lmList = detector.get_interest_points(frame = my_image, results=my_results)
+            lmList = detector.get_interest_points(frame=my_image, results=my_results)
             print(lmList)
 
             detector.mask_point(frame=my_image, lmList=lmList, pointID=13)
 
             # Draws the pose landmarks and the connections between them to the image
             detector.draw_pose_pose_landmark(frame=my_image, results=my_results)
+
+            # Inject the FPS onto the frame
+            fps_injector.update(my_image, (20, 200))
 
             # Shows the image with the landmarks on them (after the processing)
             cv2.imshow("Mediapipe Feed", my_image)
