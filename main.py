@@ -70,40 +70,7 @@ if __name__ == "__main__":
                     cv2.LINE_AA,
                 )
 
-
-                # Curl counter logic
-                if my_angle > 160 and stateMachine.current_state.value == "State0":
-                    stage = "down"
-
-                    stateMachine.switch1()
-                    print(stateMachine.current_state)
-                elif my_angle > 160 and stateMachine.current_state.value == "ReturnState3":
-                    stateMachine.to_initial()
-                    counter += 1
-                    print(stateMachine.current_state.value)
-
-                if 160 > my_angle > 100 and stateMachine.current_state.value == "State1":
-                    stateMachine.switch2()
-                    print(stateMachine.current_state.value)
-                if 160 > my_angle > 100 and stateMachine.current_state.value == "ReturnState2":
-                    stateMachine.switch5()
-                    print(stateMachine.current_state.value)
-
-                if 100 > my_angle > 60 and stateMachine.current_state.value == "State2":
-                    stateMachine.switch3()
-                    print(stateMachine.current_state.value)
-                elif 100 > my_angle > 60 and stateMachine.current_state.value == "ReturnState1":
-                    stateMachine.switch4()
-                    print(stateMachine.current_state.value)
-
-                if my_angle < 40 and stage == "down" and stateMachine.current_state.value == "State3":
-                    stage = "up"
-
-                    stateMachine.start_return_to_init_state()
-                    print(stateMachine.current_state.value)
-
-
-
+                stage, counter, _ = stateMachine.curl_logic(my_angle, counter, stage)
 
             except:
                 pass
