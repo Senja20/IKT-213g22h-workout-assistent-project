@@ -7,7 +7,7 @@ Detects repetitions for pushups.
 import cv2  # type: ignore
 import mediapipe as mp  # type: ignore
 import numpy as np
-from StateMachine.RepsStateMachine import Curl
+from StateMachine.RepsStateMachine import Curl, PushUp
 
 from Detector.Detector import Detector  # type: ignore
 from functions.calculate_angle_between_points import (  # type: ignore
@@ -25,6 +25,7 @@ mp_pose = mp.solutions.pose
 
 if __name__ == "__main__":
     stateMachine = Curl()
+    push_up = PushUp()
     # instance of the detector class
     detector = Detector(upBody=True, smoothBody=True)
     # Initialize the SelfieSegmentationModule
@@ -66,27 +67,43 @@ if __name__ == "__main__":
                 my_landmarks = my_results.pose_landmarks.landmark
 
                 # Get the coordinates that we are interested in
-                shoulder = [
+                shoulder_left = [
                     my_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
                     my_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y,
                 ]
-                elbow = [
+                elbow_left = [
                     my_landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,
                     my_landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y,
                 ]
-                wrist = [
+                wrist_left = [
                     my_landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x,
                     my_landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y,
                 ]
 
+                shoulder_right = [
+                    my_landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
+                    my_landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y,
+                ]
+                elbow_right = [
+                    my_landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
+                    my_landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y,
+                ]
+                wrist_right = [
+                    my_landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,
+                    my_landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y,
+                ]
+
+
+
                 # Calculate angle between them
-                my_angle = calculate_angle_between_points(shoulder, elbow, wrist)
+                my_angle = calculate_angle_between_points(shoulder_left, elbow_left, wrist_left)
+                angle_right = calculate_angle_between_points(shoulder_right, elbow_right, wrist_right)
 
                 # Write the angle on the picture near the elbow itself
                 cv2.putText(
                     my_image,
                     str(my_angle),
-                    tuple(np.multiply(elbow, [640, 480]).astype(int)),
+                    tuple(np.multiply(elbow_left, [640, 480]).astype(int)),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.5,
                     (255, 255, 255),
@@ -95,6 +112,7 @@ if __name__ == "__main__":
                 )
 
                 stage, counter, _ = stateMachine.curl_logic(my_angle, counter, stage)
+                push_up.update_state(shoulder_left, elbow_left,wrist_left, shoulder_right, elbow_right, wrist_right)
 
             except AttributeError:
                 # If there is no pose detected (NoneType error), pass
