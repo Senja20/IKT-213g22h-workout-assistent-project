@@ -67,14 +67,16 @@ if __name__ == "__main__":
             try:
                 my_landmarks = my_results.pose_landmarks.landmark
 
-                # do I see what I need to see
-                visible_right = my_landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].visibility > 0.5 and \
-                                my_landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].visibility > 0.5 and \
-                                my_landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].visibility > 0.5
+                visibility_threshold = 0.7
 
-                visible_left = my_landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].visibility > 0.5 and \
-                                my_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].visibility > 0.5 and \
-                                my_landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].visibility > 0.5
+                # do I see what I need to see
+                visible_right = my_landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].visibility > visibility_threshold and \
+                                my_landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].visibility > visibility_threshold and \
+                                my_landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].visibility > visibility_threshold
+
+                visible_left = my_landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].visibility > visibility_threshold and \
+                                my_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].visibility > visibility_threshold and \
+                                my_landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].visibility > visibility_threshold
 
 
                 # Get the coordinates that we are interested in
@@ -109,20 +111,33 @@ if __name__ == "__main__":
                 angle_right = calculate_angle_between_points(shoulder_right, elbow_right, wrist_right)
 
                 # Write the angle on the picture near the elbow itself
-                cv2.putText(
-                    my_image,
-                    str(my_angle),
-                    tuple(np.multiply(elbow_left, [640, 480]).astype(int)),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (255, 255, 255),
-                    2,
-                    cv2.LINE_AA,
-                )
+                if visible_left:
+                    cv2.putText(
+                        my_image,
+                        str(my_angle),
+                        tuple(np.multiply(elbow_left, [640, 480]).astype(int)),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (255, 255, 255),
+                        2,
+                        cv2.LINE_AA,
+                    )
+
+                if visible_right:
+
+                    cv2.putText(
+                        my_image,
+                        str(angle_right),
+                        tuple(np.multiply(elbow_right, [640, 480]).astype(int)),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 0, 255),
+                        2,
+                        cv2.LINE_AA,
+                    )
 
                 #stage, counter, _ = stateMachine.curl_logic(my_angle, counter, stage)
                 stage, counter = push_up.update_state(shoulder_left, elbow_left,wrist_left, shoulder_right, elbow_right, wrist_right, (visible_left, visible_right), counter)
-                print(stage)
             except AttributeError:
                 # If there is no pose detected (NoneType error), pass
                 pass
@@ -176,6 +191,19 @@ if __name__ == "__main__":
                 1,
                 cv2.LINE_AA,
             )
+
+            if visible_right == False and visible_left == False:
+                cv2.putText(
+                    my_image,
+                    "not visible",
+                    (60, 100),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    2,
+                    (255, 255, 255),
+                    1,
+                    cv2.LINE_AA,
+                )
+
             lmList = detector.get_interest_points(frame = my_image, results=my_results)
 
             detector.mask_point(frame=my_image, lmList=lmList, pointID=13)
