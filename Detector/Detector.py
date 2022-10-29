@@ -55,8 +55,8 @@ class Detector:
         if results.pose_landmarks:
             for id, lm in enumerate(results.pose_landmarks.landmark):
                 h, w, c = frame.shape
-                cx, cy = int(lm.x * w), int(lm.y * h)
-                lmList.append([id, cx, cy])
+                cx, cy, cz, visibility = int(lm.x * w), int(lm.y * h), int(lm.z * h), int(lm.visibility)
+                lmList.append([id, cx, cy, cz, visibility])
         return lmList
 
     def draw_pose_pose_landmark(self, frame, results):
@@ -64,6 +64,7 @@ class Detector:
             frame,
             results.pose_landmarks,
             self.mp_pose.POSE_CONNECTIONS,
+
             # changing color and thickness of the circle drawing
             self.mp_drawing.DrawingSpec(
                 color=(245, 117, 66), thickness=2, circle_radius=2
@@ -73,7 +74,7 @@ class Detector:
                 color=(245, 66, 230), thickness=2, circle_radius=2
             ),
         )
-
+        # self.mp_drawing.plot_landmarks(results.pose_world_landmarks, self.mp_pose.POSE_CONNECTIONS)
     def mask_point(self, frame, pointID, lmList):
         if len(lmList) != 0:
             cv2.circle(
