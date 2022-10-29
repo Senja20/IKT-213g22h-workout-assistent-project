@@ -69,7 +69,6 @@ class Exercise:
         self.left_hand.update_state(shoulder_left, elbow_left, wrist_left)
 
         if self.right_hand.current_state.value == "State1" and self.left_hand.current_state.value == "State1" and self.push_up.current_state.value == 'none':
-            print(self.push_up.current_state.value)
             self.push_up.switchInit()
         elif self.right_hand.current_state.value == "ReturnState1" and self.left_hand.current_state.value == "ReturnState1" and self.push_up.current_state.value == 'up':
             self.push_up.switchDown()
@@ -78,6 +77,9 @@ class Exercise:
             return 1
         elif self.right_hand.current_state.value == "ReturnState1" and self.left_hand.current_state.value == "ReturnState1" and self.push_up.current_state.value == 'up':
             self.push_up.switchDown()
+
+        print('right state', self.right_hand.current_state.value, ' left state ', self.left_hand.current_state.value)
+
         return 0
 
 
@@ -89,11 +91,16 @@ class Exercise:
 
         if self.right_hand.current_state.value == "State1" and self.push_up.current_state.value == 'none':
             self.push_up.switchInit()
+            self.left_hand.to_state_1()
         elif self.right_hand.current_state.value == "ReturnState1" and self.push_up.current_state.value == 'up':
             self.push_up.switchDown()
+            self.left_hand.to_return_state_1()
         elif self.right_hand.current_state.value == "State1" and self.push_up.current_state.value == 'down':
             self.push_up.switchUp()
+            self.left_hand.to_state_1()
             return 1
+
+        print('right state', self.right_hand.current_state.value, ' push up state ', self.push_up.current_state.value)
         return 0
 
     def _use_left_hand(self,shoulder_left,elbow_left,wrist_left):
@@ -102,10 +109,13 @@ class Exercise:
 
         if self.left_hand.current_state.value == "State1" and self.push_up.current_state.value == 'none':
             self.push_up.switchInit()
+            self.right_hand.to_state_1()
         elif self.left_hand.current_state.value == "ReturnState1" and self.push_up.current_state.value == 'up':
             self.push_up.switchDown()
+            self.right_hand.to_return_state_1()
         elif self.left_hand.current_state.value == "State1" and self.push_up.current_state.value == 'down':
             self.push_up.switchUp()
+            self.right_hand.to_state_1()
             return 1
         return 0
 
@@ -139,8 +149,6 @@ class Exercise:
                                 elbow_right,
                                 wrist_right)
 
-        print('push up ',  self.push_up.current_state.value)
-
         return self.push_up.current_state.value, count
 
 class PushUp(StateMachine):
@@ -161,25 +169,62 @@ class Hand(StateMachine):
         self.shoulder = shoulder
         self.angle = calculate_angle_between_points(shoulder, elbow, wrist)
 
-    State0 = State("init state", initial=True)  # before key point detection
-    State1 = State("straight")  # greater than 160 degrees
-    State2 = State("bend")  # about 120 degrees
-    State3 = State("into the body")  # less than 60 degrees
+    State0 = State("init state", initial=True)
+    State1 = State("straight")
+    State2 = State("bend")
 
     switch1 = State0.to(State1)
     switch2 = State1.to(State2)
-    switch3 = State2.to(State3)
 
-    ReturnState1 = State("return_fourth_quadrant")
-    ReturnState2 = State("return_third_quadrant")
+    ReturnState1 = State("return_third_quadrant")
     ReturnState3 = State("return_second_quadrant")
 
-    start_return_to_init_state = State3.to(ReturnState1)
+    start_return_to_init_state = State2.to(ReturnState1)
 
-    switch_return_state_2 = ReturnState1.to(ReturnState2)
-    switch5 = ReturnState2.to(ReturnState3)
+    switch5 = ReturnState1.to(ReturnState3)
 
     to_initial = ReturnState3.to(State0)
+
+    # to state 1
+    from_state_2_to_state_1 = State2.to(State1)
+    from_return_state_2_to_state1 = ReturnState1.to(State1)
+    from_return_state_3_to_state1 = ReturnState3.to(State1)
+
+    # to return state 1
+    from_state_0_to_return_state_1 = State0.to(ReturnState1)
+    from_state_1_to_return_state_1 = State1.to(ReturnState1)
+    from_state_2_to_return_state_1 = State2.to(ReturnState1)
+    from_return_state_2_to_return_state1 = ReturnState1.to(ReturnState1)
+    from_return_state_3_to_return_state1 = ReturnState3.to(ReturnState1)
+
+
+    def to_state_1(self):
+        if self.current_state.value == "State1":
+            pass
+        elif self.current_state.value == "State0":
+            self.switch1()
+        elif self.current_state.value == "State2":
+            self.from_state_2_to_state_1()
+        elif self.current_state.value == "State3":
+            self.from_state_3_to_state_1()
+        elif self.current_state.value == "ReturnState1":
+            self.from_return_state_2_to_state1()
+        elif self.current_state.value == "ReturnState3":
+            self.from_return_state_3_to_state1()
+
+    def to_return_state_1(self):
+        if self.current_state.value == "State1":
+            self.from_state_1_to_return_state_1()
+        elif self.current_state.value == "State0":
+            self.from_state_0_to_return_state_1()
+        elif self.current_state.value == "State2":
+            self.from_state_2_to_return_state_1()
+        elif self.current_state.value == "State3":
+            self.from_state_3_to_return_state_1()
+        elif self.current_state.value == "ReturnState1":
+            self.from_return_state_2_to_return_state1()
+        elif self.current_state.value == "ReturnState3":
+            self.from_return_state_3_to_return_state1()
 
     def update_state(self, shoulder, elbow, wrist):
 
@@ -192,17 +237,10 @@ class Hand(StateMachine):
 
         if 160 > self.angle > 100 and self.current_state.value == "State1":
             self.switch2()
-        if 160 > self.angle > 100 and self.current_state.value == "ReturnState2":
+        if 160 > self.angle > 100 and self.current_state.value == "ReturnState1":
             self.switch5()
 
-        if 100 > self.angle > 80 and self.current_state.value == "State2":
-            self.switch3()
-        elif 100 > self.angle > 80 and self.current_state.value == "ReturnState1":
-            self.switch_return_state_2()
-
-        print(self.angle)
-
-        if self.angle <= 80 and self.current_state.value == "State3":
+        if self.angle < 100 and self.current_state.value == "State2":
             self.start_return_to_init_state()
 
         return self.current_state.value
