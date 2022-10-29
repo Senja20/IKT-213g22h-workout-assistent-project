@@ -16,6 +16,7 @@ from functions.calculate_angle_between_points import (  # type: ignore
 from SelfieSegmentation.selfie_segmentation import SelfieSegmentation  # type: ignore
 from Utility.fps import FPS  # type: ignore
 from Utility.utility import whiteness_offset  # type: ignore
+from ROI.ROI import ROI
 
 # Gives us all the drawing utilities. Going to be used to visualize the poses
 mp_drawing = mp.solutions.drawing_utils
@@ -30,6 +31,9 @@ if __name__ == "__main__":
     detector = Detector(upBody=True, smoothBody=True)
     # Initialize the SelfieSegmentationModule
     segmenter = SelfieSegmentation()
+
+    #region of interest
+    roi = ROI()
 
     # Initialize the FPS reader for displaying on the final image
     fps_injector = FPS()
@@ -59,13 +63,18 @@ if __name__ == "__main__":
             clean_img = segmenter.removeBG(
                 my_frame, imgBg=bg_image, threshold=threshold
             )
+            if roi.roi_detected == "true":
+                clean_img = roi.add_region_of_interest(clean_img)
 
             my_image, my_results = detector.make_detections(clean_img)
 
             # Extract landmarks
             try:
                 my_landmarks = my_results.pose_landmarks.landmark
-
+                # my_image = create_region_of_interest(my_image, my_landmarks)
+                if roi.roi_detected == "false":
+                    roi.detect_roi(my_image, my_landmarks)
+                    
                 # Get the coordinates that we are interested in
                 shoulder_left = [
                     my_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
