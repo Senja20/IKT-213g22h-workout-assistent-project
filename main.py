@@ -34,6 +34,7 @@ if __name__ == "__main__":
 
     #region of interest
     roi = ROI()
+    init_state_detected = "false"
 
     # Initialize the FPS reader for displaying on the final image
     fps_injector = FPS()
@@ -63,6 +64,7 @@ if __name__ == "__main__":
             clean_img = segmenter.removeBG(
                 my_frame, imgBg=bg_image, threshold=threshold
             )
+
             if roi.roi_detected == "true":
                 clean_img = roi.add_region_of_interest(clean_img)
 
@@ -72,9 +74,9 @@ if __name__ == "__main__":
             try:
                 my_landmarks = my_results.pose_landmarks.landmark
                 # my_image = create_region_of_interest(my_image, my_landmarks)
-                if roi.roi_detected == "false":
+                if init_state_detected == "true" and roi.roi_detected == "false":
                     roi.detect_roi(my_image, my_landmarks)
-                    
+    
                 # Get the coordinates that we are interested in
                 shoulder_left = [
                     my_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
