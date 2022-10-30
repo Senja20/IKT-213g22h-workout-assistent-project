@@ -196,7 +196,7 @@ if __name__ == "__main__":
                 cv2.putText(
                     my_image,
                     "not visible",
-                    (60, 100),
+                    (10, 100),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     2,
                     (255, 255, 255),
