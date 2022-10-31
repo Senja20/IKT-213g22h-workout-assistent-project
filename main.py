@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     #region of interest
     roi = ROI()
-    init_state_detected = "false"
+    init_state_detected = False
 
     # Initialize the FPS reader for displaying on the final image
     fps_injector = FPS()
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                 my_frame, imgBg=bg_image, threshold=threshold
             )
 
-            if roi.roi_detected == "true":
+            if roi.roi_detected:
                 clean_img = roi.add_region_of_interest(clean_img)
 
             my_image, my_results = detector.make_detections(clean_img)
@@ -74,7 +74,7 @@ if __name__ == "__main__":
             try:
                 my_landmarks = my_results.pose_landmarks.landmark
                 # my_image = create_region_of_interest(my_image, my_landmarks)
-                if init_state_detected == "true" and roi.roi_detected == "false":
+                if init_state_detected and not roi.roi_detected:
                     roi.detect_roi(my_image, my_landmarks)
     
                 # Get the coordinates that we are interested in
