@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 class ROI: 
-    def __init__(self, roi_detected = 'false'):
+    def __init__(self, roi_detected = False):
         self.roi_detected: bool = roi_detected
         self.roi_polygon: np.array
         self.roi_image: np.array
@@ -39,12 +39,12 @@ class ROI:
         self.roi_polygon = np.array([[(roi_min_x , roi_max_y), (roi_min_x, roi_min_y),
         (roi_max_x, roi_min_y), (roi_max_x, roi_max_y)]], dtype= np.int32)
 
-    def add_region_of_interest(self, image):
-        image_gray= cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        blank = np.zeros_like(image_gray)
+    def add_region_of_interest(self, image: np.array):
+        blank = np.zeros(image.shape[0:2], dtype='uint8')
 
-        region_of_interest = cv2.fillPoly(blank, self.roi_polygon, 255)
-        self.roi_image = cv2.bitwise_and(image_gray, region_of_interest)
-        self.roi_image = cv2.cvtColor(self.roi_image, cv2.COLOR_GRAY2BGR)
-
+        region_of_interest = cv2.fillPoly(blank, self.roi_polygon, color=(255, 255, 255))
+        mask = cv2.bitwise_or(blank, region_of_interest)
+        
+        self.roi_image = cv2.bitwise_and(image, image, mask = mask)
+        
         return self.roi_image
