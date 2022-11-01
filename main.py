@@ -8,13 +8,13 @@ import cv2  # type: ignore
 import mediapipe as mp  # type: ignore
 import numpy as np
 
-from StateMachine.RepsStateMachine import Curl, Exercise
-
 from Detector.Detector import Detector  # type: ignore
 from functions.calculate_angle_between_points import (  # type: ignore
     calculate_angle_between_points,
 )
+from ROI.ROI import ROI
 from SelfieSegmentation.selfie_segmentation import SelfieSegmentation  # type: ignore
+from StateMachine.RepsStateMachine import Curl, Exercise
 from Utility.fps import FPS  # type: ignore
 from Utility.utility import whiteness_offset  # type: ignore
 
@@ -31,6 +31,10 @@ if __name__ == "__main__":
     detector = Detector(upBody=True, smoothBody=True)
     # Initialize the SelfieSegmentationModule
     segmenter = SelfieSegmentation()
+
+    # region of interest
+    roi = ROI()
+    init_state_detected = False
 
     # Initialize the FPS reader for displaying on the final image
     fps_injector = FPS()
@@ -61,23 +65,42 @@ if __name__ == "__main__":
                 my_frame, imgBg=bg_image, threshold=threshold
             )
 
-            my_image, my_results = detector.make_detections(my_frame)
+            if roi.roi_detected:
+                clean_img = roi.add_region_of_interest(clean_img)
+
+            my_image, my_results = detector.make_detections(clean_img)
 
             # Extract landmarks
             try:
                 my_landmarks = my_results.pose_landmarks.landmark
+                # my_image = create_region_of_interest(my_image, my_landmarks)
+                if init_state_detected and not roi.roi_detected:
+                    roi.detect_roi(my_image, my_landmarks)
 
                 visibility_threshold = 0.7
 
                 # do I see what I need to see
-                visible_right = my_landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].visibility > visibility_threshold and \
-                                my_landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].visibility > visibility_threshold and \
-                                my_landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].visibility > visibility_threshold
+                visible_right = (
+                    my_landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].visibility
+                    > visibility_threshold
+                    and my_landmarks[
+                        mp_pose.PoseLandmark.RIGHT_SHOULDER.value
+                    ].visibility
+                    > visibility_threshold
+                    and my_landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].visibility
+                    > visibility_threshold
+                )
 
-                visible_left = my_landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].visibility > visibility_threshold and \
-                                my_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].visibility > visibility_threshold and \
-                                my_landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].visibility > visibility_threshold
-
+                visible_left = (
+                    my_landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].visibility
+                    > visibility_threshold
+                    and my_landmarks[
+                        mp_pose.PoseLandmark.LEFT_SHOULDER.value
+                    ].visibility
+                    > visibility_threshold
+                    and my_landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].visibility
+                    > visibility_threshold
+                )
 
                 # Get the coordinates that we are interested in
                 shoulder_left = [
@@ -107,8 +130,12 @@ if __name__ == "__main__":
                 ]
 
                 # Calculate angle between them
-                my_angle = calculate_angle_between_points(shoulder_left, elbow_left, wrist_left)
-                angle_right = calculate_angle_between_points(shoulder_right, elbow_right, wrist_right)
+                my_angle = calculate_angle_between_points(
+                    shoulder_left, elbow_left, wrist_left
+                )
+                angle_right = calculate_angle_between_points(
+                    shoulder_right, elbow_right, wrist_right
+                )
 
                 # Write the angle on the picture near the elbow itself
                 if visible_left:
@@ -136,8 +163,17 @@ if __name__ == "__main__":
                         cv2.LINE_AA,
                     )
 
-                #stage, counter, _ = stateMachine.curl_logic(my_angle, counter, stage)
-                stage, counter = push_up.update_state(shoulder_left, elbow_left,wrist_left, shoulder_right, elbow_right, wrist_right, (visible_left, visible_right), counter)
+                # stage, counter, _ = stateMachine.curl_logic(my_angle, counter, stage)
+                stage, counter = push_up.update_state(
+                    shoulder_left,
+                    elbow_left,
+                    wrist_left,
+                    shoulder_right,
+                    elbow_right,
+                    wrist_right,
+                    (visible_left, visible_right),
+                    counter,
+                )
             except AttributeError:
                 # If there is no pose detected (NoneType error), pass
                 pass
@@ -204,7 +240,7 @@ if __name__ == "__main__":
                     cv2.LINE_AA,
                 )
 
-            lmList = detector.get_interest_points(frame = my_image, results=my_results)
+            lmList = detector.get_interest_points(frame=my_image, results=my_results)
 
             detector.mask_point(frame=my_image, lmList=lmList, pointID=13)
 
