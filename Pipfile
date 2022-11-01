@@ -9,6 +9,7 @@ mediapipe = "0.8.11"
 black = "*"
 python-statemachine = "*"
 pandas = "*"
+matplotlib = "3.6.1"
 
 [dev-packages]
 pylint = "*"
