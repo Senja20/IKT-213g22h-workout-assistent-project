@@ -57,6 +57,7 @@ class Exercise:
         self.left_hand = Hand()
         self.right_hand = Hand()
         self.push_up = PushUp()
+        self.back = Back()
 
     def _use_both_hands(
         self,
