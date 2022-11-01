@@ -3,10 +3,16 @@ Prof of concept for a workout assistant, utilizing Mediapipe, OpenCV, and
 our own custom code (some based on CVZone).
 Detects repetitions for pushups.
 """
+from datetime import datetime
 
 import cv2  # type: ignore
 import mediapipe as mp  # type: ignore
 import numpy as np
+import time
+import sqlite3
+
+from datebase.connect import connect_to_db
+from datebase.add_record import add_record
 
 from StateMachine.RepsStateMachine import Curl, Exercise
 
@@ -24,7 +30,16 @@ mp_drawing = mp.solutions.drawing_utils
 # Importing the pose estimation models
 mp_pose = mp.solutions.pose
 
+
 if __name__ == "__main__":
+
+    start_time = 0
+    duration_time = 60
+    remaining_time = 60
+
+    # database
+    cur, con  = connect_to_db()
+
     stateMachine = Curl()
     push_up = Exercise()
     # instance of the detector class
@@ -49,8 +64,8 @@ if __name__ == "__main__":
     with mp_pose.Pose(
         min_detection_confidence=0.5, min_tracking_confidence=0.5
     ) as my_pose:
-
-        while cap.isOpened():
+        start_time = time.time()
+        while cap.isOpened() and remaining_time > 0.5:
             # Stores what ever we get from the capture (ret is return variable
             # (nothing here) and frame is the image)
             ret, my_frame = cap.read()
@@ -136,8 +151,33 @@ if __name__ == "__main__":
                         cv2.LINE_AA,
                     )
 
+                    if visible_right == False and visible_left == False:
+                        cv2.putText(
+                            my_image,
+                            "not visible",
+                            (10, 100),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            2,
+                            (255, 255, 255),
+                            1,
+                            cv2.LINE_AA,
+                        )
+
+
+
                 #stage, counter, _ = stateMachine.curl_logic(my_angle, counter, stage)
                 stage, counter = push_up.update_state(shoulder_left, elbow_left,wrist_left, shoulder_right, elbow_right, wrist_right, (visible_left, visible_right), counter)
+                remaining_time = duration_time - ( time.time() -start_time )
+                cv2.putText(
+                    my_image,
+                    ("{:.2f}".format(round(remaining_time, 2))),
+                    (10, 120),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    2,
+                    (0, 0, 255),
+                    1,
+                    cv2.LINE_AA,
+                )
             except AttributeError:
                 # If there is no pose detected (NoneType error), pass
                 pass
@@ -192,17 +232,6 @@ if __name__ == "__main__":
                 cv2.LINE_AA,
             )
 
-            if visible_right == False and visible_left == False:
-                cv2.putText(
-                    my_image,
-                    "not visible",
-                    (10, 100),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    2,
-                    (255, 255, 255),
-                    1,
-                    cv2.LINE_AA,
-                )
 
             lmList = detector.get_interest_points(frame = my_image, results=my_results)
 
@@ -220,6 +249,8 @@ if __name__ == "__main__":
             if cv2.waitKey(10) & 0xFF == ord("q"):
                 break
 
+    record = [(datetime.now(), counter)]
+    add_record(cur, con, record)
     # Releases the capture device
     cap.release()
     # Closes all windows

@@ -222,7 +222,7 @@ class Hand(StateMachine):
         elif self.current_state.value == "State3":
             self.from_state_3_to_return_state_1()
         elif self.current_state.value == "ReturnState1":
-            self.from_return_state_2_to_return_state1()
+            pass
         elif self.current_state.value == "ReturnState3":
             self.from_return_state_3_to_return_state1()
 
