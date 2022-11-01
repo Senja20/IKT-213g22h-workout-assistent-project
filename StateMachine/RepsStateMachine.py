@@ -1,7 +1,7 @@
-from statemachine import StateMachine, State
 from functions.calculate_angle_between_points import (  # type: ignore
     calculate_angle_between_points,
 )
+from statemachine import State, StateMachine
 
 
 class Curl(StateMachine):
@@ -58,67 +58,110 @@ class Exercise:
         self.right_hand = Hand()
         self.push_up = PushUp()
 
-    def _use_both_hands(self,shoulder_left,
+    def _use_both_hands(
+        self,
+        shoulder_left,
         elbow_left,
         wrist_left,
         shoulder_right,
         elbow_right,
-        wrist_right):
+        wrist_right,
+    ):
 
         self.right_hand.update_state(shoulder_right, elbow_right, wrist_right)
         self.left_hand.update_state(shoulder_left, elbow_left, wrist_left)
 
-        if self.right_hand.current_state.value == "State1" and self.left_hand.current_state.value == "State1" and self.push_up.current_state.value == 'none':
+        if (
+            self.right_hand.current_state.value == "State1"
+            and self.left_hand.current_state.value == "State1"
+            and self.push_up.current_state.value == "none"
+        ):
             self.push_up.switchInit()
-        elif self.right_hand.current_state.value == "ReturnState1" and self.left_hand.current_state.value == "ReturnState1" and self.push_up.current_state.value == 'up':
+        elif (
+            self.right_hand.current_state.value == "ReturnState1"
+            and self.left_hand.current_state.value == "ReturnState1"
+            and self.push_up.current_state.value == "up"
+        ):
             self.push_up.switchDown()
-        elif self.right_hand.current_state.value == "State1" and self.left_hand.current_state.value == "State1" and self.push_up.current_state.value == 'down':
+        elif (
+            self.right_hand.current_state.value == "State1"
+            and self.left_hand.current_state.value == "State1"
+            and self.push_up.current_state.value == "down"
+        ):
             self.push_up.switchUp()
             return 1
-        elif self.right_hand.current_state.value == "ReturnState1" and self.left_hand.current_state.value == "ReturnState1" and self.push_up.current_state.value == 'up':
+        elif (
+            self.right_hand.current_state.value == "ReturnState1"
+            and self.left_hand.current_state.value == "ReturnState1"
+            and self.push_up.current_state.value == "up"
+        ):
             self.push_up.switchDown()
 
-        print('right state', self.right_hand.current_state.value, ' left state ', self.left_hand.current_state.value)
+        print(
+            "right state",
+            self.right_hand.current_state.value,
+            " left state ",
+            self.left_hand.current_state.value,
+        )
 
         return 0
 
-
-    def _use_right_hand(self,shoulder_right,
-        elbow_right,
-        wrist_right):
+    def _use_right_hand(self, shoulder_right, elbow_right, wrist_right):
 
         self.right_hand.update_state(shoulder_right, elbow_right, wrist_right)
 
-        if self.right_hand.current_state.value == "State1" and self.push_up.current_state.value == 'none':
+        if (
+            self.right_hand.current_state.value == "State1"
+            and self.push_up.current_state.value == "none"
+        ):
             self.push_up.switchInit()
             self.left_hand.to_state_1()
-        elif self.right_hand.current_state.value == "ReturnState1" and self.push_up.current_state.value == 'up':
+        elif (
+            self.right_hand.current_state.value == "ReturnState1"
+            and self.push_up.current_state.value == "up"
+        ):
             self.push_up.switchDown()
             self.left_hand.to_return_state_1()
-        elif self.right_hand.current_state.value == "State1" and self.push_up.current_state.value == 'down':
+        elif (
+            self.right_hand.current_state.value == "State1"
+            and self.push_up.current_state.value == "down"
+        ):
             self.push_up.switchUp()
             self.left_hand.to_state_1()
             return 1
 
-        print('right state', self.right_hand.current_state.value, ' push up state ', self.push_up.current_state.value)
+        print(
+            "right state",
+            self.right_hand.current_state.value,
+            " push up state ",
+            self.push_up.current_state.value,
+        )
         return 0
 
-    def _use_left_hand(self,shoulder_left,elbow_left,wrist_left):
+    def _use_left_hand(self, shoulder_left, elbow_left, wrist_left):
 
         self.left_hand.update_state(shoulder_left, elbow_left, wrist_left)
 
-        if self.left_hand.current_state.value == "State1" and self.push_up.current_state.value == 'none':
+        if (
+            self.left_hand.current_state.value == "State1"
+            and self.push_up.current_state.value == "none"
+        ):
             self.push_up.switchInit()
             self.right_hand.to_state_1()
-        elif self.left_hand.current_state.value == "ReturnState1" and self.push_up.current_state.value == 'up':
+        elif (
+            self.left_hand.current_state.value == "ReturnState1"
+            and self.push_up.current_state.value == "up"
+        ):
             self.push_up.switchDown()
             self.right_hand.to_return_state_1()
-        elif self.left_hand.current_state.value == "State1" and self.push_up.current_state.value == 'down':
+        elif (
+            self.left_hand.current_state.value == "State1"
+            and self.push_up.current_state.value == "down"
+        ):
             self.push_up.switchUp()
             self.right_hand.to_state_1()
             return 1
         return 0
-
 
     def update_state(
         self,
@@ -129,27 +172,28 @@ class Exercise:
         elbow_right,
         wrist_right,
         visibility,
-        count
+        count,
     ):
-        l,r = visibility
+        l, r = visibility
 
         if l and r:
-            count = count + self._use_both_hands(shoulder_left,
-            elbow_left,
-            wrist_left,
-            shoulder_right,
-            elbow_right,
-            wrist_right)
+            count = count + self._use_both_hands(
+                shoulder_left,
+                elbow_left,
+                wrist_left,
+                shoulder_right,
+                elbow_right,
+                wrist_right,
+            )
         elif l and not r:
-            count = count + self._use_left_hand(shoulder_left,
-            elbow_left,
-            wrist_left)
+            count = count + self._use_left_hand(shoulder_left, elbow_left, wrist_left)
         elif not l and r:
-            count = count + self._use_right_hand(shoulder_right,
-                                elbow_right,
-                                wrist_right)
+            count = count + self._use_right_hand(
+                shoulder_right, elbow_right, wrist_right
+            )
 
         return self.push_up.current_state.value, count
+
 
 class PushUp(StateMachine):
     none = State("none", initial=True)
@@ -159,7 +203,6 @@ class PushUp(StateMachine):
     switchInit = none.to(up)
     switchUp = down.to(up)
     switchDown = up.to(down)
-
 
 
 class Hand(StateMachine):
@@ -196,7 +239,6 @@ class Hand(StateMachine):
     from_state_2_to_return_state_1 = State2.to(ReturnState1)
     from_return_state_2_to_return_state1 = ReturnState1.to(ReturnState1)
     from_return_state_3_to_return_state1 = ReturnState3.to(ReturnState1)
-
 
     def to_state_1(self):
         if self.current_state.value == "State1":
@@ -245,5 +287,56 @@ class Hand(StateMachine):
 
         return self.current_state.value
 
-if __name__ == '__main__':
-    print('ha loh')
+
+class Back(StateMachine):
+    init = State("init state", initial=True)  # before key point detection
+    straight = State("straight")
+    bent = State("bent")
+
+    switch1 = init.to(straight)
+    switch2 = straight.to(bent)
+    switch3 = bent.to(straight)
+
+    def update_state(
+        self,
+        shoulder_left: tuple[int, int] | tuple[None],
+        shoulder_right: tuple[int, int] | tuple[None],
+        hip_left: tuple[int, int] | tuple[None],
+        hip_right: tuple[int, int] | tuple[None],
+        knee_left: tuple[int, int] | tuple[None],
+        knee_right: tuple[int, int] | tuple[None],
+    ):
+        angle_left_back = (
+            calculate_angle_between_points(shoulder_left, hip_left, knee_left)
+            if shoulder_left and hip_left and knee_left
+            else 0
+        )
+        angle_right_back = (
+            calculate_angle_between_points(shoulder_right, hip_right, knee_right)
+            if shoulder_right and hip_right and knee_right
+            else 0
+        )
+
+        # Check if either/or back angles are close to 180 degrees +- 20
+        # In initial state -> straight
+        if self.current_state.value == "init" and (
+            (160 > angle_left_back < 200) or (160 > angle_right_back < 200)
+        ):
+            self.switch1()
+        # In state straight -> bent
+        elif self.current_state.value == "straight" and (
+            (angle_left_back < 160 or angle_left_back > 200)
+            or (angle_right_back < 160 or angle_right_back > 200)
+        ):
+            self.switch2()
+        # In state bent -> straight
+        elif self.current_state.value == "bent" and (
+            (160 > angle_left_back < 200) or (160 > angle_right_back < 200)
+        ):
+            self.switch3()
+
+        return self.current_state.value
+
+
+if __name__ == "__main__":
+    print("ha loh")
