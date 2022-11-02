@@ -4,12 +4,10 @@ import matplotlib.dates
 import matplotlib.dates as mdates
 import pandas as pd
 
-
-from datetime import datetime
+from datebase.connect import connect_to_db
 
 if __name__ == "__main__":
-    con = sqlite3.connect("records.db")
-    cur = con.cursor()
+    cur, con = connect_to_db()
 
     date_points = []
     reps = []

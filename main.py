@@ -11,7 +11,6 @@ import numpy as np
 import time
 import sqlite3
 
-from datebase.connect import connect_to_db
 from datebase.add_record import add_record
 
 from Detector.Detector import Detector  # type: ignore
@@ -38,8 +37,6 @@ if __name__ == "__main__":
     remaining_time = 60
 
     # database
-    cur, con = connect_to_db()
-
     stateMachine = Curl()
     push_up = Exercise()
     # instance of the detector class
@@ -283,7 +280,7 @@ if __name__ == "__main__":
                 break
 
     record = [(datetime.now(), counter)]
-    add_record(cur, con, record)
+    add_record(record)
     # Releases the capture device
     cap.release()
     # Closes all windows
