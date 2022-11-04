@@ -16,7 +16,7 @@ from datebase.add_record import add_record
 from Detector.Detector import Detector  # type: ignore
 from ROI.ROI import ROI  # type: ignore
 from SelfieSegmentation.selfie_segmentation import SelfieSegmentation  # type: ignore
-from StateMachine.RepsStateMachine import Exercise, Curl  # type: ignore
+from StateMachine.RepsStateMachine import Exercise  # type: ignore
 from Utility.fps import FPS  # type: ignore
 from Utility.utility import define_body_part, whiteness_offset  # type: ignore
 
@@ -33,8 +33,6 @@ if __name__ == "__main__":
     duration_time = 60
     remaining_time = 60
 
-    # database
-    stateMachine = Curl()
     push_up = Exercise()
     # instance of the detector class
     detector = Detector(upBody=True, smoothBody=True)
