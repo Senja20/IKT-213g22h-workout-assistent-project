@@ -1,10 +1,9 @@
-import sqlite3
-import matplotlib.pyplot as plt
-import matplotlib.dates
+import matplotlib.dates  # type: ignore
 import matplotlib.dates as mdates
-import pandas as pd
+import matplotlib.pyplot as plt  # type: ignore
+import pandas as pd  # type: ignore
 
-from datebase.connect import connect_to_db
+from datebase.connect import connect_to_db  # type: ignore
 
 if __name__ == "__main__":
     cur, con = connect_to_db()
@@ -15,20 +14,19 @@ if __name__ == "__main__":
         print(row[0])
         print(row[1])
 
-        #date_points.append(datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S.%f').date())
+        # date_points.append(datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S.%f').date())
         date_points.append(pd.to_datetime(row[0]))
         reps.append(int(row[1]))
 
-
     dates = matplotlib.dates.date2num(date_points)
-    #matplotlib.pyplot.plot_date(dates, reps)
+    # matplotlib.pyplot.plot_date(dates, reps)
 
     plt.scatter(date_points, reps)
     plt.title("Data")
     plt.xlabel("dates")
     plt.ylabel("number of push ups")
     plt.gcf().autofmt_xdate()
-    myFmt = mdates.DateFormatter('%H:%M')
+    myFmt = mdates.DateFormatter("%H:%M")
     plt.gca().xaxis.set_major_formatter(myFmt)
     plt.show()
     plt.close()

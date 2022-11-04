@@ -3,16 +3,13 @@ Proof of concept for a workout assistant, utilizing Mediapipe, OpenCV, and
 our own custom code (some based on CVZone).
 Detects repetitions for pushups.
 """
+import time
 from datetime import datetime
 
 import cv2  # type: ignore
 import mediapipe as mp  # type: ignore
-import numpy as np
-import time
-import sqlite3
 
-from datebase.add_record import add_record
-
+from datebase.add_record import add_record # type: ignore
 from Detector.Detector import Detector  # type: ignore
 from ROI.ROI import ROI  # type: ignore
 from SelfieSegmentation.selfie_segmentation import SelfieSegmentation  # type: ignore
