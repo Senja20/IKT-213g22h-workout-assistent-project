@@ -10,23 +10,18 @@ if __name__ == "__main__":
 
     date_points = []
     reps = []
-    for row in cur.execute("SELECT * FROM logs"):
-        print(row[0])
-        print(row[1])
 
-        # date_points.append(datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S.%f').date())
+    for row in cur.execute("SELECT * FROM logs"):
         date_points.append(pd.to_datetime(row[0]))
         reps.append(int(row[1]))
 
     dates = matplotlib.dates.date2num(date_points)
-    # matplotlib.pyplot.plot_date(dates, reps)
 
     plt.scatter(date_points, reps)
-    plt.title("Data")
-    plt.xlabel("dates")
+    plt.title("Push Ups")
+    plt.xlabel("Dates")
     plt.ylabel("number of push ups")
     plt.gcf().autofmt_xdate()
-    myFmt = mdates.DateFormatter("%H:%M")
-    plt.gca().xaxis.set_major_formatter(myFmt)
+    plt.tick_params(rotation=45)
     plt.show()
     plt.close()
