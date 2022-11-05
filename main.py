@@ -77,7 +77,7 @@ if __name__ == "__main__":
                 if init_state_detected and not roi.roi_detected:
                     roi.detect_roi(my_image, my_landmarks)
 
-                visibility_threshold = 0.5
+                visibility_threshold = 0.6
 
                 # Get the coordinates that we are interested in
                 shoulder_left = define_body_part(
@@ -148,7 +148,7 @@ if __name__ == "__main__":
                 cv2.putText(
                     my_image,
                     ("{:.2f}".format(round(remaining_time, 2))),
-                    (10, 120),
+                    (150, 120),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     2,
                     (0, 0, 255),
