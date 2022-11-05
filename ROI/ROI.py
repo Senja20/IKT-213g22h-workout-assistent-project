@@ -29,10 +29,13 @@ class ROI:
             if landmark.y > maximum_y:
                 maximum_y = landmark.y
 
-        roi_min_x = minimum_x*image_width - image_width*0.1
-        roi_max_x = maximum_x*image_width + image_width*0.1
-        roi_min_y = minimum_y*image_height - image_height*0.1
-        roi_max_y = maximum_y*image_height + image_height*0.1
+        delta_x = maximum_x*image_width - minimum_x*image_width
+        delta_y = maximum_y*image_height - minimum_y*image_height
+
+        roi_min_x = minimum_x*image_width - delta_x*0.1
+        roi_max_x = maximum_x*image_width + delta_x*0.1
+        roi_min_y = minimum_y*image_height - delta_y*0.1
+        roi_max_y = maximum_y*image_height + delta_y*0.1
 
         self.roi_detected = 'true'
 
