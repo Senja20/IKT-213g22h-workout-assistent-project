@@ -3,10 +3,13 @@ Proof of concept for a workout assistant, utilizing Mediapipe, OpenCV, and
 our own custom code (some based on CVZone).
 Detects repetitions for pushups.
 """
+import time
+from datetime import datetime
 
 import cv2  # type: ignore
 import mediapipe as mp  # type: ignore
 
+from datebase.add_record import add_record # type: ignore
 from Detector.Detector import Detector  # type: ignore
 from ROI.ROI import ROI  # type: ignore
 from SelfieSegmentation.selfie_segmentation import SelfieSegmentation  # type: ignore
@@ -20,7 +23,13 @@ mp_drawing = mp.solutions.drawing_utils
 # Importing the pose estimation models
 mp_pose = mp.solutions.pose
 
+
 if __name__ == "__main__":
+
+    start_time = 0
+    duration_time = 60
+    remaining_time = 60
+
     push_up = Exercise()
     # instance of the detector class
     detector = Detector(upBody=True, smoothBody=True)
@@ -42,8 +51,8 @@ if __name__ == "__main__":
     with mp_pose.Pose(
         min_detection_confidence=0.5, min_tracking_confidence=0.5
     ) as my_pose:
-
-        while cap.isOpened():
+        start_time = time.time()
+        while cap.isOpened() and remaining_time > 0.5:
             # Stores what ever we get from the capture (ret is return variable
             # (nothing here) and frame is the image)
             ret, my_frame = cap.read()
@@ -68,7 +77,7 @@ if __name__ == "__main__":
                 if push_up.reps and not roi.roi_detected:
                     roi.detect_roi(my_image, my_landmarks)
 
-                visibility_threshold = 0.5
+                visibility_threshold = 0.6
 
                 # Get the coordinates that we are interested in
                 shoulder_left = define_body_part(
@@ -134,6 +143,17 @@ if __name__ == "__main__":
                     hip_right=hip_right,
                     knee_left=knee_left,
                     knee_right=knee_right,
+                )
+                remaining_time = duration_time - (time.time() - start_time)
+                cv2.putText(
+                    my_image,
+                    ("{:.2f}".format(round(remaining_time, 2))),
+                    (150, 120),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    2,
+                    (0, 0, 255),
+                    1,
+                    cv2.LINE_AA,
                 )
             except AttributeError:
                 # If there is no pose detected (NoneType error), pass
@@ -252,6 +272,8 @@ if __name__ == "__main__":
             if cv2.waitKey(10) & 0xFF == ord("q"):
                 break
 
+    record = [(datetime.now(), push_up.reps)]
+    add_record(record)
     # Releases the capture device
     cap.release()
     # Closes all windows
