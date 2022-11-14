@@ -9,7 +9,7 @@ from datetime import datetime
 import cv2  # type: ignore
 import mediapipe as mp  # type: ignore
 
-from datebase.add_record import add_record # type: ignore
+from datebase.add_record import add_record  # type: ignore
 from Detector.Detector import Detector  # type: ignore
 from ROI.ROI import ROI  # type: ignore
 from SelfieSegmentation.selfie_segmentation import SelfieSegmentation  # type: ignore
@@ -26,9 +26,9 @@ mp_pose = mp.solutions.pose
 
 if __name__ == "__main__":
 
-    start_time = 0
-    duration_time = 60
-    remaining_time = 60
+    start_time = 0.0
+    duration_time = 60.0
+    remaining_time = 60.0
 
     push_up = Exercise()
     # instance of the detector class
@@ -57,79 +57,72 @@ if __name__ == "__main__":
             # (nothing here) and frame is the image)
             ret, my_frame = cap.read()
 
-            threshold = whiteness_offset(my_frame)
-            bg_image = cv2.GaussianBlur(my_frame, (55, 55), 0)
-            # clean_img = segmenter.removeBG(
-            #     my_frame, imgBg=bg_image, threshold=threshold
-            # )
-            clean_img = my_frame  # TODO: Re-enable clean_image if possible
-
             if roi.roi_detected:
-                clean_img = roi.add_region_of_interest(clean_img)
+                my_frame = roi.add_region_of_interest(my_frame)
 
-            my_image, my_results = detector.make_detections(clean_img)
+            my_image, my_results = detector.make_detections(my_frame)
 
             # Extract landmarks
             try:
                 my_landmarks = my_results.pose_landmarks.landmark
                 # my_image = create_region_of_interest(my_image, my_landmarks)
-                
+
                 if push_up.reps and not roi.roi_detected:
                     roi.detect_roi(my_image, my_landmarks)
 
-                visibility_threshold = 0.6
+                VISIBILITY_THRESHOLD = 0.6
 
                 # Get the coordinates that we are interested in
                 shoulder_left = define_body_part(
                     mp_pose.PoseLandmark.LEFT_SHOULDER.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
                 elbow_left = define_body_part(
                     mp_pose.PoseLandmark.LEFT_ELBOW.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
                 wrist_left = define_body_part(
                     mp_pose.PoseLandmark.LEFT_WRIST.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
                 hip_left = define_body_part(
                     mp_pose.PoseLandmark.LEFT_HIP.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
                 knee_left = define_body_part(
                     mp_pose.PoseLandmark.LEFT_KNEE.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
 
                 shoulder_right = define_body_part(
                     mp_pose.PoseLandmark.RIGHT_SHOULDER.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
                 elbow_right = define_body_part(
                     mp_pose.PoseLandmark.RIGHT_ELBOW.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
                 wrist_right = define_body_part(
                     mp_pose.PoseLandmark.RIGHT_WRIST.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
                 hip_right = define_body_part(
                     mp_pose.PoseLandmark.RIGHT_HIP.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
                 knee_right = define_body_part(
                     mp_pose.PoseLandmark.RIGHT_KNEE.value,
                     my_landmarks,
-                    visibility_threshold,
+                    VISIBILITY_THRESHOLD,
                 )
 
                 push_up.update_state(
@@ -256,9 +249,14 @@ if __name__ == "__main__":
                 cv2.LINE_AA,
             )
 
+            # Get landmarks list
             lmList = detector.get_interest_points(frame=my_image, results=my_results)
 
+            # Draw circles on angle keypoints
             detector.mask_point(frame=my_image, lmList=lmList, pointID=13)
+            detector.mask_point(frame=my_image, lmList=lmList, pointID=14)
+            detector.mask_point(frame=my_image, lmList=lmList, pointID=23)
+            detector.mask_point(frame=my_image, lmList=lmList, pointID=24)
 
             # Draws the pose landmarks and the connections between them to the image
             detector.draw_pose_pose_landmark(frame=my_image, results=my_results)

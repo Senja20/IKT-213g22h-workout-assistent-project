@@ -37,7 +37,7 @@ class ROI:
         roi_min_y = minimum_y*image_height - delta_y*0.1
         roi_max_y = maximum_y*image_height + delta_y*0.1
 
-        self.roi_detected = 'true'
+        self.roi_detected = True
 
         self.roi_polygon = np.array([[(roi_min_x , roi_max_y), (roi_min_x, roi_min_y),
         (roi_max_x, roi_min_y), (roi_max_x, roi_max_y)]], dtype= np.int32)
