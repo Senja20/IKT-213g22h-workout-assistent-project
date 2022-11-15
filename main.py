@@ -65,7 +65,6 @@ if __name__ == "__main__":
             # Extract landmarks
             try:
                 my_landmarks = my_results.pose_landmarks.landmark
-                # my_image = create_region_of_interest(my_image, my_landmarks)
 
                 if push_up.reps and not roi.roi_detected:
                     roi.detect_roi(my_image, my_landmarks)
@@ -149,7 +148,7 @@ if __name__ == "__main__":
                     cv2.LINE_AA,
                 )
             except AttributeError:
-                # If there is no pose detected (NoneType error), pass
+                # If there is no pose detected (NoneType Attribute error), pass
                 pass
 
             # Visualize the curl counter in a box
