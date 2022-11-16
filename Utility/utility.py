@@ -5,7 +5,8 @@ import cv2  # type: ignore
 
 
 def whiteness_offset(img) -> float:
-    """Uses the amount of white vs other noise in the image to decide a threshold for background removal
+    """Uses the amount of white vs other noise in the image to decide a
+    threshold for background removal
 
     Args:
         img (np.nparray): The image to calculate the threshold for
@@ -28,10 +29,12 @@ def define_body_part(lm_id: int, landmarks: list, threshold: float = 0.5) -> tup
     Args:
         id (int): The id of the body part, based on PoseLandmark enum
         landmarks (list): The landmarks from the pose detection
-        threshold (float, optional): The threshold to use for the detection. Defaults to 0.5.
+        threshold (float, optional): The threshold to use for the detection.
+            Defaults to 0.5.
 
     Returns:
-        tuple: The x and y coordinates of the body part. If the body part is not visible, an empty tuple is returned
+        tuple: The x and y coordinates of the body part. If the body part is
+        not visible, an empty tuple is returned
     """
     return (
         (
