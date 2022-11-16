@@ -63,6 +63,7 @@ class Exercise:
         self.right_hand_visibility = False
 
         self.posture_abort = False
+        self.bad_posture = False
 
         self.reps = 0
 
@@ -74,10 +75,6 @@ class Exercise:
         shoulder_right: tuple[int, int] | tuple[None],
         elbow_right: tuple[int, int] | tuple[None],
         wrist_right: tuple[int, int] | tuple[None],
-        hip_left: tuple[int, int] | tuple[None],
-        hip_right: tuple[int, int] | tuple[None],
-        knee_left: tuple[int, int] | tuple[None],
-        knee_right: tuple[int, int] | tuple[None],
     ) -> None:
 
         self.right_hand.update_state(
@@ -88,10 +85,6 @@ class Exercise:
         self.left_hand.update_state(
             shoulder=shoulder_left, elbow=elbow_left, wrist=wrist_left
         )
-        self.posture_abort = self.back.update_state(
-            shoulder_left, shoulder_right, hip_left, hip_right, knee_left, knee_right
-        )
-
         self.reps = self.push_up.update_state_both_hands(
             self.right_hand, self.left_hand, self.back, self.reps
         )
@@ -101,18 +94,10 @@ class Exercise:
         shoulder_right: tuple[int, int] | tuple[None],
         elbow_right: tuple[int, int] | tuple[None],
         wrist_right: tuple[int, int] | tuple[None],
-        shoulder_left: tuple[int, int] | tuple[None],
-        hip_left: tuple[int, int] | tuple[None],
-        hip_right: tuple[int, int] | tuple[None],
-        knee_left: tuple[int, int] | tuple[None],
-        knee_right: tuple[int, int] | tuple[None],
     ):
 
         self.right_hand.update_state(
             shoulder=shoulder_right, elbow=elbow_right, wrist=wrist_right
-        )
-        self.posture_abort = self.back.update_state(
-            shoulder_left, shoulder_right, hip_left, hip_right, knee_left, knee_right
         )
 
         self.reps = self.push_up.update_state_right(
@@ -124,20 +109,11 @@ class Exercise:
         shoulder_left: tuple[int, int] | tuple[None],
         elbow_left: tuple[int, int] | tuple[None],
         wrist_left: tuple[int, int] | tuple[None],
-        shoulder_right: tuple[int, int] | tuple[None],
-        hip_left: tuple[int, int] | tuple[None],
-        hip_right: tuple[int, int] | tuple[None],
-        knee_left: tuple[int, int] | tuple[None],
-        knee_right: tuple[int, int] | tuple[None],
     ):
 
         self.left_hand.update_state(
             shoulder=shoulder_left, elbow=elbow_left, wrist=wrist_left
         )
-        self.posture_abort = self.back.update_state(
-            shoulder_left, shoulder_right, hip_left, hip_right, knee_left, knee_right
-        )
-        print(f"Posture abort: {self.posture_abort}")
 
         self.reps = self.push_up.update_state_left(self.left_hand, self.back, self.reps)
 
@@ -157,6 +133,11 @@ class Exercise:
         self.left_hand_visibility = shoulder_left and elbow_left and wrist_left
         self.right_hand_visibility = shoulder_right and elbow_right and wrist_right
 
+        self.posture_abort = self.back.update_state(
+            shoulder_left, shoulder_right, hip_left, hip_right, knee_left, knee_right
+        )
+        self.bad_posture = not self.back.is_straight  # pylint: disable=no-member
+
         if self.left_hand_visibility and self.right_hand_visibility:
             self._use_both_hands(
                 shoulder_left=shoulder_left,
@@ -165,32 +146,18 @@ class Exercise:
                 shoulder_right=shoulder_right,
                 elbow_right=elbow_right,
                 wrist_right=wrist_right,
-                hip_left=hip_left,
-                hip_right=hip_right,
-                knee_left=knee_left,
-                knee_right=knee_right,
             )
         elif self.left_hand_visibility and not self.right_hand_visibility:
             self._use_left_hand(
                 shoulder_left=shoulder_left,
                 elbow_left=elbow_left,
                 wrist_left=wrist_left,
-                shoulder_right=shoulder_right,
-                hip_left=hip_left,
-                hip_right=hip_right,
-                knee_left=knee_left,
-                knee_right=knee_right,
             )
         elif not self.left_hand_visibility and self.right_hand_visibility:
             self._use_right_hand(
                 shoulder_right=shoulder_right,
                 elbow_right=elbow_right,
                 wrist_right=wrist_right,
-                shoulder_left=shoulder_left,
-                hip_left=hip_left,
-                hip_right=hip_right,
-                knee_left=knee_left,
-                knee_right=knee_right,
             )
 
         return self.push_up.current_state.value, self.reps
@@ -437,27 +404,32 @@ class Back(StateMachine):
             else 0
         )
 
+        lower = 160
+        upper = 180
+        error = 10
+
         # Check if either/or back angles are close to 180 degrees +- 20
         # In initial state -> straight
         if self.current_state.value == "init" and (
-            (160 >= angle_left_back <= 200) or (160 >= angle_right_back <= 200)
+            (lower <= angle_left_back <= upper) or (lower <= angle_right_back <= upper)
         ):
             self.switch_init()
         # Skip if no back visibility
         elif angle_left_back == 0 and angle_right_back == 0:
             # Abort update if no back points are available
             print("No back visibility, Counting reps, but posture has no estimate")
-            if self.current_state.value != "straight":
+            if self.current_state.value == "bent":
+                # Force state into straight when no knees are visible
                 self.switch_straight()
         # In state straight -> bent
         elif self.current_state.value == "straight" and (
-            (10 < angle_left_back < 160 or angle_left_back > 200)
-            or (10 < angle_right_back < 160 or angle_right_back > 200)
+            (error < angle_left_back < lower or angle_left_back > upper)
+            or (error < angle_right_back < lower or angle_right_back > upper)
         ):
             self.switch_bent()
         # In state bent -> straight
         elif self.current_state.value == "bent" and (
-            (160 > angle_left_back < 200) or (160 > angle_right_back < 200)
+            (lower <= angle_left_back <= upper) or (lower <= angle_right_back < upper)
         ):
             self.switch_straight()
 
