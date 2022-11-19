@@ -159,6 +159,9 @@ if __name__ == "__main__":
             # Box for posture abort
             if push_up.posture_abort:
                 cv2.rectangle(my_image, (0, 73 * 2), (255, 73 * 3), (0, 0, 200), -1)
+            # Box for bad posture
+            if push_up.bad_posture:
+                cv2.rectangle(my_image, (0, 73 * 3), (255, 73 * 4), (100, 100, 200), -1)
 
             # The reps text in the box
             cv2.putText(
@@ -241,6 +244,16 @@ if __name__ == "__main__":
                 my_image,
                 "Posture Abort!" if push_up.posture_abort else "",
                 (10, 200),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 255, 255),
+                1,
+                cv2.LINE_AA,
+            )
+            cv2.putText(
+                my_image,
+                "Bad posture" if push_up.bad_posture else "",
+                (10, 250),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
                 (255, 255, 255),
