@@ -31,7 +31,7 @@ Make sure that you are using the same python version in order to avoid issues wi
 - Once the application start, a timer will go off and go for 1 minute. Once the time is up, count of reps and time of exercise are added to the database.   
 
 ## Review data in database
-In order to view data in the data set up can use different methods
+Several methods can be used to view the historical data.
  - Using `sqlite cli`, by typing in the terminal (make sure you are in the same folder as the database) command `sqlite <DB-NAME>`, that will allow to use SQL to make queries to the database.
  - Use the command python data_report.py or simply run the data_report.py in order to get historical data overview.
  - If you are using Pycharm you have the option of connecting  ot the database, using the in-build Pycharm interface and use it to view, change and query for data. You can find interface in View -> Tool Window -> Database, there select Data Source Properties icon, and as described in the [documentation](https://www.jetbrains.com/help/pycharm/sqlite.html) connect the sqlite database. 
