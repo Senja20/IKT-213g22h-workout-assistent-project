@@ -33,5 +33,5 @@ Make sure that you are using the same python version in order to avoid issues wi
 ## Review data in database
 In order to view data in the data set up can use different methods
  - Using `sqlite cli`, by typing in the terminal (make sure you are in the same folder as the database) command `sqlite <DB-NAME>`, that will allow to use SQL to make queries to the database.
- - Using pre-made scrip, use the command `python data_report.py` or simply run the data_report.py ion order to get data overview. 
+ - Use the command python data_report.py or simply run the data_report.py in order to get historical data overview.
  - If you are using Pycharm you have the option of connecting  ot the database, suing Pycharm inbuilt interface and use it to view, change and query for data. You can find interface in View -> Tool Window -> Database, there select Data Source Properties icon, and as described in the [documentation](https://www.jetbrains.com/help/pycharm/sqlite.html) connect the sqlite database. 
