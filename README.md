@@ -12,9 +12,17 @@ Make sure that you are using the same python version in order to avoid issues wi
 
 - `sqlite` database is used in the application. Make sure you have [installed](https://sqlite.org/cli.html) `sqlite cli` for usage of the database. 
 
+#### Make sure environment variables are [added](https://www.schrodinger.com/kb/1842) to the system settings. 
+
 ## Set up
 
-- 
+- `Pipenv shell` command to enter a pipenv shell
+- `pipenv install` installation command
+
+### optional commands
+
+- `pipenv install --deploy` enforce pipenv.lock and install
+- `pipenv install --system` install dependencies to the system
 
 ## Usage
 
