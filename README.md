@@ -26,4 +26,7 @@ Make sure that you are using the same python version in order to avoid issues wi
 
 ## Usage
 
+- In case if you are using PyCharm make sure you have added and configure Python interpreter by following [documentation](https://www.jetbrains.com/help/pycharm/configuring-python-interpreter.html#interpreter). 
+- The starting point of the application is `main.py` file, that can be started using command `python main.py`. 
+
 ## Structure
